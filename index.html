@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Operaciones Fundamentales</title>
+</head>
+<body>
+
+<h2>Registro de Usuario</h2>
+
+<input type="text" id="apodo" placeholder="Escribe tu apodo">
+<button onclick="guardarUsuario()">Guardar</button>
+
+<p id="mensaje"></p>
+
+<script>
+const SUPABASE_URL = "TU_URL";
+const SUPABASE_KEY = "TU_API_KEY";
+
+function generarCodigo() {
+    return "MAT-" + Math.random().toString(36).substring(2, 6).toUpperCase();
+}
+
+async function guardarUsuario() {
+    let apodo = document.getElementById("apodo").value;
+    let codigo = generarCodigo();
+
+    let res = await fetch(SUPABASE_URL + "/rest/v1/usuarios", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "apikey": SUPABASE_KEY,
+            "Authorization": "Bearer " + SUPABASE_KEY,
+            "Prefer": "return=minimal"
+        },
+        body: JSON.stringify({
+            apodo: apodo,
+            codigo: codigo
+        })
+    });
+
+    if (res.ok) {
+        document.getElementById("mensaje").innerText =
+            "Usuario guardado: " + codigo;
+    } else {
+        document.getElementById("mensaje").innerText =
+            "Error al guardar";
+    }
+}
+</script>
+
+</body>
+</html>
