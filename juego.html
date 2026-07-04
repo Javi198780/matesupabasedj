@@ -2,40 +2,77 @@
 <html lang="es">
 
 <head>
-    <meta charset="UTF-8">
-    <title>Juego de Matemáticas</title>
+<meta charset="UTF-8">
+<title>Juego Matemáticas</title>
 </head>
 
 <body>
 
-    <h1>Juego de Matemáticas</h1>
+<h1>Juego de Matemáticas</h1>
 
-    <h3 id="jugador"></h3>
+<h3 id="jugador"></h3>
 
-    <p>Puntaje: <span id="puntaje">0</span></p>
+<p>Puntaje: <span id="puntaje">0</span></p>
 
-    <button onclick="sumarPuntos()">Responder Correctamente</button>
+<button onclick="sumarPuntos()">Responder Correctamente</button>
 
-    <script>
+<script>
 
-        // Leer el jugador guardado
-        var apodo = localStorage.getItem("apodo");
+const SUPABASE_URL = "https://qebardxcfqygyqfmgsve.supabase.co";
+const SUPABASE_KEY = "sb_publishable_qX4tkZKMKofpFKnfNa7s4w_w85jJ-WQ";
 
-        document.getElementById("jugador").innerHTML =
-            "Jugador: " + apodo;
+var apodo = localStorage.getItem("apodo");
 
-        var puntos = 0;
+document.getElementById("jugador").innerHTML =
+"Jugador: " + apodo;
 
-        function sumarPuntos(){
+var puntos = 0;
 
-            puntos = puntos + 10;
+async function guardarPuntaje(){
 
-            document.getElementById("puntaje").innerHTML = puntos;
+    try{
 
-        }
+        const response = await fetch(
+            SUPABASE_URL + "/rest/v1/puntajes",
+            {
+                method:"POST",
+                headers:{
+                    "apikey":SUPABASE_KEY,
+                    "Authorization":"Bearer " + SUPABASE_KEY,
+                    "Content-Type":"application/json",
+                    "Prefer":"return=representation"
+                },
+                body:JSON.stringify({
+                    apodo: apodo,
+                    puntaje: puntos
+                })
+            }
+        );
 
-    </script>
+        const resultado = await response.text();
+
+        console.log(response.status);
+        console.log(resultado);
+
+    }catch(error){
+
+        console.log(error);
+
+    }
+
+}
+
+function sumarPuntos(){
+
+    puntos += 10;
+
+    document.getElementById("puntaje").innerHTML = puntos;
+
+    guardarPuntaje();
+
+}
+
+</script>
 
 </body>
-
 </html>
