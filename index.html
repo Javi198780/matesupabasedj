@@ -1,52 +1,133 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Operaciones Fundamentales</title>
+
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background: linear-gradient(135deg, #4facfe, #00f2fe);
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 0;
+}
+
+.card {
+    background: white;
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    width: 300px;
+    text-align: center;
+}
+
+h2 {
+    margin-bottom: 20px;
+    color: #333;
+}
+
+input {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    outline: none;
+}
+
+button {
+    width: 100%;
+    padding: 10px;
+    background: #4facfe;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: 0.3s;
+}
+
+button:hover {
+    background: #007acc;
+}
+
+#mensaje {
+    margin-top: 15px;
+    font-weight: bold;
+}
+</style>
+</head>
+
 <body>
 
-<h2>Test Supabase</h2>
+<div class="card">
 
-<input id="apodo" placeholder="Apodo">
-<button onclick="guardar()">Guardar</button>
+<h2>Registro de Usuario</h2>
+
+<input type="text" id="apodo" placeholder="Escribe tu apodo">
+
+<button onclick="guardarUsuario()" id="btn">Guardar</button>
 
 <p id="mensaje"></p>
 
+</div>
+
 <script>
+
 const SUPABASE_URL = "https://qebardxcfqygyqfmgsve.supabase.co";
 const SUPABASE_KEY = "sb_publishable_qX4tkZKMKofpFKnfNa7s4w_w85jJ-WQ";
 
-async function guardar() {
+function generarCodigo() {
+    return "MAT-" + Math.random().toString(36).substring(2, 6).toUpperCase();
+}
 
-    console.log("Ejecutando guardar()");
+async function guardarUsuario() {
 
-    const apodo = document.getElementById("apodo").value;
-    const codigo = "MAT-" + Math.random().toString(36).substring(2, 6).toUpperCase();
+    let apodo = document.getElementById("apodo").value;
+    let mensaje = document.getElementById("mensaje");
+    let btn = document.getElementById("btn");
 
-    const url = SUPABASE_URL + "/rest/v1/usuarios";
+    if (apodo.trim() === "") {
+        mensaje.innerText = "⚠ Escribe un apodo";
+        mensaje.style.color = "red";
+        return;
+    }
 
-    const headers = {
-        "Content-Type": "application/json",
-        "apikey": SUPABASE_KEY,
-        "Authorization": "Bearer " + SUPABASE_KEY,
-        "Prefer": "return=minimal"
-    };
+    let codigo = generarCodigo();
 
-    console.log("HEADERS:", headers);
+    btn.disabled = true;
+    btn.innerText = "Guardando...";
 
-    const response = await fetch(url, {
+    let res = await fetch(SUPABASE_URL + "/rest/v1/usuarios", {
         method: "POST",
-        headers: headers,
+        headers: {
+            "Content-Type": "application/json",
+            "apikey": SUPABASE_KEY,
+            "Authorization": "Bearer " + SUPABASE_KEY,
+            "Prefer": "return=minimal"
+        },
         body: JSON.stringify({
             apodo: apodo,
             codigo: codigo
         })
     });
 
-    const text = await response.text();
+    btn.disabled = false;
+    btn.innerText = "Guardar";
 
-    console.log("STATUS:", response.status);
-    console.log("RESPONSE:", text);
-
-    document.getElementById("mensaje").innerText = text;
+    if (res.ok) {
+        mensaje.style.color = "green";
+        mensaje.innerText = "✔ Usuario guardado: " + codigo;
+        document.getElementById("apodo").value = "";
+    } else {
+        mensaje.style.color = "red";
+        mensaje.innerText = "❌ Error al guardar";
+    }
 }
+
 </script>
 
 </body>
