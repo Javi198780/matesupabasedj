@@ -4,15 +4,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Guardar en Supabase</title>
+    <title>Registro de Jugador</title>
 </head>
 
 <body>
 
-    <h2>Guardar usuario en Supabase</h2>
+    <h2>Registro del Jugador</h2>
 
     <input type="text" id="apodo" placeholder="Ingrese un apodo">
-    <button type="button" onclick="guardar()">Guardar</button>
+    <button type="button" onclick="guardar()">Comenzar Juego</button>
 
     <p id="mensaje"></p>
 
@@ -20,6 +20,25 @@
 
         const SUPABASE_URL = "https://qebardxcfqygyqfmgsve.supabase.co";
         const SUPABASE_KEY = "sb_publishable_qX4tkZKMKofpFKnfNa7s4w_w85jJ-WQ";
+
+        // Verificar si el usuario ya está registrado
+        window.onload = function () {
+
+            var usuarioId = localStorage.getItem("usuario_id");
+
+            if (usuarioId != null) {
+
+                document.getElementById("mensaje").innerHTML =
+                    "👋 Bienvenido nuevamente <b>" +
+                    localStorage.getItem("apodo") +
+                    "</b>";
+
+                document.getElementById("apodo").value =
+                    localStorage.getItem("apodo");
+
+            }
+
+        };
 
         async function guardar() {
 
@@ -31,14 +50,32 @@
                 var apodo = document.getElementById("apodo").value.trim();
 
                 if (apodo === "") {
+
                     mensaje.innerHTML = "Debe ingresar un apodo.";
                     return;
+
                 }
 
-                var codigo = "MAT-" + Math.random().toString(36).substring(2, 6).toUpperCase();
+                // Si ya existe un usuario guardado
+                if (localStorage.getItem("usuario_id") != null) {
 
-                console.log("Apodo:", apodo);
-                console.log("Código:", codigo);
+                    mensaje.innerHTML =
+                        "✅ Ya estás registrado como <b>" +
+                        localStorage.getItem("apodo") +
+                        "</b>";
+
+                    // Aquí luego iremos al juego
+                    // window.location.href = "juego.html";
+
+                    return;
+
+                }
+
+                var codigo = "MAT-" +
+                    Math.random()
+                        .toString(36)
+                        .substring(2, 6)
+                        .toUpperCase();
 
                 var response = await fetch(
                     SUPABASE_URL + "/rest/v1/usuarios",
@@ -57,28 +94,48 @@
                     }
                 );
 
-                var resultado = await response.text();
-
-                console.log("Estado:", response.status);
-                console.log("Respuesta:", resultado);
-
                 if (response.ok) {
 
-                    mensaje.innerHTML = "✅ Registro guardado correctamente.";
+                    var usuario = await response.json();
+
+                    console.log(usuario);
+
+                    // Guardar datos del jugador
+                    localStorage.setItem("usuario_id", usuario[0].id);
+                    localStorage.setItem("apodo", usuario[0].apodo);
+                    localStorage.setItem("codigo", usuario[0].codigo);
+
+                    mensaje.innerHTML =
+                        "✅ Bienvenido <b>" +
+                        usuario[0].apodo +
+                        "</b><br>Tu código es: " +
+                        usuario[0].codigo;
 
                     document.getElementById("apodo").value = "";
 
-                } else {
+                    // Más adelante aquí abriremos el juego
+                    // window.location.href="juego.html";
 
-                    mensaje.innerHTML = "❌ Error " + response.status + "<br>" + resultado;
+                }
+                else {
+
+                    var error = await response.text();
+
+                    mensaje.innerHTML =
+                        "❌ Error " +
+                        response.status +
+                        "<br>" +
+                        error;
 
                 }
 
-            } catch (e) {
+            }
+            catch (e) {
 
                 console.error(e);
 
-                mensaje.innerHTML = "Error: " + e.message;
+                mensaje.innerHTML =
+                    "Error: " + e.message;
 
             }
 
