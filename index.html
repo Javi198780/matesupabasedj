@@ -75,7 +75,7 @@ button:hover {
 
 const SUPABASE_URL = "https://qebardxcfqygyqfmgsve.supabase.co";
 const SUPABASE_KEY = "sb_publishable_qX4tkZKMKofpFKnfNa7s4w_w85jJ-WQ";
-    
+
 let num1, num2, op, resultado;
 
 function generarOperacion() {
@@ -89,7 +89,7 @@ function generarOperacion() {
     if (op === "-") resultado = num1 - num2;
     if (op === "*") resultado = num1 * num2;
     if (op === "/") {
-        num1 = num1 * num2;
+        num1 = num1 * num2; // división exacta
         resultado = num1 / num2;
     }
 
@@ -130,7 +130,6 @@ async function verificar() {
 
         let puntos = 1;
 
-        // BONUS por tipo de operación
         if (op === "*") puntos = 2;
         if (op === "/") puntos = 3;
 
