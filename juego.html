@@ -16,66 +16,53 @@
 
     <button onclick="sumarPuntos()">Responder Correctamente</button>
 
-    <script>
+   <script>
+    const SUPABASE_URL = "https://qebardxcfqygyqfmgsve.supabase.co";
+    const SUPABASE_KEY = "sb_publishable_qX4tkZKMKofpFKnfNa7s4w_w85jJ-WQ";
 
-        const SUPABASE_URL = "https://qebardxcfqygyqfmgsve.supabase.co";
-        const SUPABASE_KEY = "sb_publishable_qX4tkZKMKofpFKnfNa7s4w_w85jJ-WQ";
+    var usuarioId = localStorage.getItem("usuario_id");
+    var apodo = localStorage.getItem("apodo");
 
-        // Obtener datos del jugador
-        var usuarioId = localStorage.getItem("usuario_id");
-        var apodo = localStorage.getItem("apodo");
+    document.getElementById("jugador").innerHTML =
+        "Jugador: " + apodo;
 
-        document.getElementById("jugador").innerHTML =
-            "Jugador: " + apodo;
+    var puntos = 0;
 
-        var puntos = 0;
+    async function guardarPuntaje() {
+        try {
+            const response = await fetch(
+                SUPABASE_URL + "/rest/v1/puntajes",
+                {
+                    method: "POST",
+                    headers: {
+                        "apikey": SUPABASE_KEY,
+                        "Authorization": "Bearer " + SUPABASE_KEY,
+                        "Content-Type": "application/json",
+                        "Prefer": "return=representation"
+                    },
+                    body: JSON.stringify({
+                        usuario_id: usuarioId,
+                        puntos: puntos
+                    })
+                }
+            );
 
-        async function guardarPuntaje() {
+            const resultado = await response.text();
 
-            try {
-
-                const response = await fetch(
-                    SUPABASE_URL + "/rest/v1/puntajes",
-                    {
-                        method: "POST",
-                        headers: {
-                            "apikey": SUPABASE_KEY,
-                            "Authorization": "Bearer " + SUPABASE_KEY,
-                            "Content-Type": "application/json",
-                            "Prefer": "return=representation"
-                        },
-                        body: JSON.stringify({
-                            usuario_id: Number(usuarioId),
-                            puntos: puntos
-                        })
-                    }
-                );
-
-                const resultado = await response.text();
-
-                console.log("Estado:", response.status);
-                console.log("Respuesta:", resultado);
-
-            }
-            catch (error) {
-
-                console.log(error);
-
-            }
-
+            console.log("Estado:", response.status);
+            console.log("Respuesta:", resultado);
         }
-
-        function sumarPuntos() {
-
-            puntos += 10;
-
-            document.getElementById("puntaje").innerHTML = puntos;
-
-            guardarPuntaje();
-
+        catch (error) {
+            console.log(error);
         }
+    }
 
-    </script>
+    function sumarPuntos() {
+        puntos += 10;
+        document.getElementById("puntaje").innerHTML = puntos;
+        guardarPuntaje();
+    }
+</script>
 
 </body>
 
