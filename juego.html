@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Juego de Matemáticas</title>
+</head>
+
+<body>
+
+    <h1>Juego de Matemáticas</h1>
+
+    <h3 id="jugador"></h3>
+
+    <p>Puntaje: <span id="puntaje">0</span></p>
+
+    <button onclick="sumarPuntos()">Responder Correctamente</button>
+
+    <script>
+
+        // Leer el jugador guardado
+        var apodo = localStorage.getItem("apodo");
+
+        document.getElementById("jugador").innerHTML =
+            "Jugador: " + apodo;
+
+        var puntos = 0;
+
+        function sumarPuntos(){
+
+            puntos = puntos + 10;
+
+            document.getElementById("puntaje").innerHTML = puntos;
+
+        }
+
+    </script>
+
+</body>
+
+</html>
