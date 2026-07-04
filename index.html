@@ -12,7 +12,16 @@
     <h2>Registro del Jugador</h2>
 
     <input type="text" id="apodo" placeholder="Ingrese un apodo">
-    <button type="button" onclick="guardar()">Comenzar Juego</button>
+
+    <button type="button" onclick="guardar()">
+        Registrar Jugador
+    </button>
+
+    <button type="button" onclick="irJuego()">
+        Ir al Juego
+    </button>
+
+    <br><br>
 
     <p id="mensaje"></p>
 
@@ -20,56 +29,56 @@
 
         const SUPABASE_URL = "https://qebardxcfqygyqfmgsve.supabase.co";
         const SUPABASE_KEY = "sb_publishable_qX4tkZKMKofpFKnfNa7s4w_w85jJ-WQ";
-
-        // Verificar si el usuario ya está registrado
+        
+        // Cuando abre la página
         window.onload = function () {
 
             var usuarioId = localStorage.getItem("usuario_id");
 
             if (usuarioId != null) {
 
-                document.getElementById("mensaje").innerHTML =
-                    "👋 Bienvenido nuevamente <b>" +
-                    localStorage.getItem("apodo") +
-                    "</b>";
-
                 document.getElementById("apodo").value =
                     localStorage.getItem("apodo");
+
+                document.getElementById("mensaje").innerHTML =
+                    "👋 Bienvenido <b>" +
+                    localStorage.getItem("apodo") +
+                    "</b><br>Ya puedes ingresar al juego.";
 
             }
 
         };
 
+
         async function guardar() {
 
             var mensaje = document.getElementById("mensaje");
+
             mensaje.innerHTML = "";
 
+            var apodo = document.getElementById("apodo").value.trim();
+
+            if (apodo == "") {
+
+                mensaje.innerHTML = "Debe ingresar un apodo.";
+
+                return;
+
+            }
+
+            // Si ya está registrado
+            if (localStorage.getItem("usuario_id") != null) {
+
+                mensaje.innerHTML =
+                    "✅ Ya estás registrado como <b>" +
+                    localStorage.getItem("apodo") +
+                    "</b>";
+
+                return;
+
+            }
+
             try {
-
-                var apodo = document.getElementById("apodo").value.trim();
-
-                if (apodo === "") {
-
-                    mensaje.innerHTML = "Debe ingresar un apodo.";
-                    return;
-
-                }
-
-                // Si ya existe un usuario guardado
-                if (localStorage.getItem("usuario_id") != null) {
-
-                    mensaje.innerHTML =
-                        "✅ Ya estás registrado como <b>" +
-                        localStorage.getItem("apodo") +
-                        "</b>";
-
-                    // Aquí luego iremos al juego
-                    // window.location.href = "juego.html";
-
-                    return;
-
-                }
 
                 var codigo = "MAT-" +
                     Math.random()
@@ -98,46 +107,46 @@
 
                     var usuario = await response.json();
 
-                    console.log(usuario);
-
-                    // Guardar datos del jugador
+                    // Guardar datos del usuario
                     localStorage.setItem("usuario_id", usuario[0].id);
                     localStorage.setItem("apodo", usuario[0].apodo);
                     localStorage.setItem("codigo", usuario[0].codigo);
 
                     mensaje.innerHTML =
-                        "✅ Bienvenido <b>" +
-                        usuario[0].apodo +
-                        "</b><br>Tu código es: " +
-                        usuario[0].codigo;
-
-                    document.getElementById("apodo").value = "";
-
-                    // Más adelante aquí abriremos el juego
-                    // window.location.href="juego.html";
+                        "✅ Registro correcto.<br>" +
+                        "Jugador: <b>" + usuario[0].apodo + "</b><br>" +
+                        "Código: <b>" + usuario[0].codigo + "</b>";
 
                 }
                 else {
 
                     var error = await response.text();
 
-                    mensaje.innerHTML =
-                        "❌ Error " +
-                        response.status +
-                        "<br>" +
-                        error;
+                    mensaje.innerHTML = error;
 
                 }
 
             }
             catch (e) {
 
-                console.error(e);
-
-                mensaje.innerHTML =
-                    "Error: " + e.message;
+                mensaje.innerHTML = e.message;
 
             }
+
+        }
+
+
+        function irJuego() {
+
+            if (localStorage.getItem("usuario_id") == null) {
+
+                alert("Primero debe registrar un jugador.");
+
+                return;
+
+            }
+
+            window.location.href = "juego.html";
 
         }
 
