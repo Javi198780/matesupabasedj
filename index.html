@@ -74,7 +74,7 @@ button:hover {
 <script>
 
 const SUPABASE_URL = "https://qebardxcfqygyqfmgsve.supabase.co";
-const SUPABASE_KEY = "sb_publishable_qX4tkZKMKofpFKnfNa7s4w_w85jJ-WQ";
+const SUPABASE_KEY = "TU_ANON_KEY_REAL_AQUI"; // ⚠️ usa anon key
 
 let num1, num2, op, resultado;
 
@@ -89,7 +89,7 @@ function generarOperacion() {
     if (op === "-") resultado = num1 - num2;
     if (op === "*") resultado = num1 * num2;
     if (op === "/") {
-        num1 = num1 * num2; // división exacta
+        num1 = num1 * num2;
         resultado = num1 / num2;
     }
 
@@ -99,7 +99,7 @@ function generarOperacion() {
 
 async function guardarPuntos(apodo, puntos) {
 
-    await fetch(SUPABASE_URL + "/rest/v1/puntos", {
+    const response = await fetch(SUPABASE_URL + "/rest/v1/puntos", {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
@@ -112,12 +112,15 @@ async function guardarPuntos(apodo, puntos) {
             fecha: new Date().toISOString()
         })
     });
+
+    const text = await response.text();
+    console.log("SUPABASE RESPONSE:", text);
 }
 
 async function verificar() {
 
-    let apodo = document.getElementById("apodo").value;
-    let respuesta = parseFloat(document.getElementById("respuesta").value);
+    let apodo = document.getElementById("apodo").value.trim();
+    let respuesta = Number(document.getElementById("respuesta").value);
     let mensaje = document.getElementById("mensaje");
 
     if (!apodo) {
@@ -126,7 +129,15 @@ async function verificar() {
         return;
     }
 
-    if (respuesta === resultado) {
+    if (isNaN(respuesta)) {
+        mensaje.style.color = "red";
+        mensaje.innerText = "Escribe un número válido";
+        return;
+    }
+
+    console.log("Respuesta:", respuesta, "Resultado:", resultado);
+
+    if (respuesta == resultado) {
 
         let puntos = 1;
 
