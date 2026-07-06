@@ -2,108 +2,169 @@
 <html lang="es">
 
 <head>
-    <meta charset="UTF-8">
-    <title>Juego Matemáticas</title>
+<meta charset="UTF-8">
+<title>Juego Matemático</title>
 </head>
 
 <body>
 
-    <h1>Juego de Matemáticas</h1>
+<h1>Juego de Matemáticas</h1>
 
-    <h3 id="jugador"></h3>
+<h3 id="jugador"></h3>
 
-    <p>Puntaje: <span id="puntaje">0</span></p>
+<h2 id="pregunta"></h2>
 
-    <button type="button" onclick="sumarPuntos()">
-        Responder Correctamente
-    </button>
+<input type="number" id="respuesta">
 
-    <script>
+<button onclick="verificar()">
+Responder
+</button>
 
-        const SUPABASE_URL = "https://qebardxcfqygyqfmgsve.supabase.co";
-        const SUPABASE_KEY = "sb_publishable_qX4tkZKMKofpFKnfNa7s4w_w85jJ-WQ";
+<p id="mensaje"></p>
 
-        var usuarioId = localStorage.getItem("usuario_id");
-        var apodo = localStorage.getItem("apodo");
+<h3>Puntaje: <span id="puntaje">0</span></h3>
 
-        if (usuarioId == null || apodo == null) {
+<script>
 
-            alert("Primero debe registrar un jugador.");
+const SUPABASE_URL = "https://qebardxcfqygyqfmgsve.supabase.co";
+const SUPABASE_KEY = "sb_publishable_qX4tkZKMKofpFKnfNa7s4w_w85jJ-WQ";
 
-            window.location.href = "index.html";
+let usuarioId = localStorage.getItem("usuario_id");
+let apodo = localStorage.getItem("apodo");
 
-        }
+if(!usuarioId){
 
-        document.getElementById("jugador").innerHTML =
-            "Jugador: " + apodo;
+    alert("Debe registrarse.");
 
-        var puntos = 0;
+    location.href="index.html";
 
-        async function guardarPuntaje() {
+}
 
-            if (usuarioId == null) {
+document.getElementById("jugador").innerHTML="Jugador: "+apodo;
 
-                alert("No se encontró el jugador registrado.");
+let puntos=0;
 
-                window.location.href = "index.html";
+let numero1;
+let numero2;
+let respuestaCorrecta;
 
-                return;
+function nuevaPregunta(){
 
+    let operador=Math.floor(Math.random()*4);
+
+    numero1=Math.floor(Math.random()*20)+1;
+    numero2=Math.floor(Math.random()*20)+1;
+
+    switch(operador){
+
+        case 0:
+
+            respuestaCorrecta=numero1+numero2;
+
+            document.getElementById("pregunta").innerHTML=
+            numero1+" + "+numero2+" = ?";
+
+        break;
+
+        case 1:
+
+            respuestaCorrecta=numero1-numero2;
+
+            document.getElementById("pregunta").innerHTML=
+            numero1+" - "+numero2+" = ?";
+
+        break;
+
+        case 2:
+
+            respuestaCorrecta=numero1*numero2;
+
+            document.getElementById("pregunta").innerHTML=
+            numero1+" × "+numero2+" = ?";
+
+        break;
+
+        case 3:
+
+            respuestaCorrecta=numero1;
+
+            let resultado=numero1;
+
+            numero1=numero1*numero2;
+
+            document.getElementById("pregunta").innerHTML=
+            numero1+" ÷ "+numero2+" = ?";
+
+        break;
+
+    }
+
+    document.getElementById("respuesta").value="";
+    document.getElementById("respuesta").focus();
+
+}
+
+async function guardarPuntaje(){
+
+    try{
+
+        await fetch(
+            SUPABASE_URL+"/rest/v1/puntajes",
+            {
+                method:"POST",
+                headers:{
+                    "apikey":SUPABASE_KEY,
+                    "Authorization":"Bearer "+SUPABASE_KEY,
+                    "Content-Type":"application/json"
+                },
+                body:JSON.stringify({
+
+                    usuario_id:usuarioId,
+                    puntos:puntos
+
+                })
             }
+        );
 
-            try {
+    }
+    catch(e){
 
-                const response = await fetch(
-                    SUPABASE_URL + "/rest/v1/puntajes",
-                    {
-                        method: "POST",
-                        headers: {
-                            "apikey": SUPABASE_KEY,
-                            "Authorization": "Bearer " + SUPABASE_KEY,
-                            "Content-Type": "application/json",
-                            "Prefer": "return=representation"
-                        },
-                        body: JSON.stringify({
-                            usuario_id: usuarioId,
-                            puntos: puntos
-                        })
-                    }
-                );
+        console.log(e);
 
-                const resultado = await response.text();
+    }
 
-                console.log("Estado:", response.status);
-                console.log("Respuesta:", resultado);
+}
 
-                if (!response.ok) {
+async function verificar(){
 
-                    alert("Error al guardar puntaje.");
+    let respuestaUsuario=
+    Number(document.getElementById("respuesta").value);
 
-                }
+    if(respuestaUsuario===respuestaCorrecta){
 
-            }
-            catch (error) {
+        puntos+=10;
 
-                console.log(error);
+        document.getElementById("puntaje").innerHTML=puntos;
 
-                alert("Error de conexión con Supabase.");
+        document.getElementById("mensaje").innerHTML=
+        "✅ Correcto";
 
-            }
+        await guardarPuntaje();
 
-        }
+    }else{
 
-        function sumarPuntos() {
+        document.getElementById("mensaje").innerHTML=
+        "❌ Incorrecto. La respuesta era "+respuestaCorrecta;
 
-            puntos += 10;
+    }
 
-            document.getElementById("puntaje").innerHTML = puntos;
+    nuevaPregunta();
 
-            guardarPuntaje();
+}
 
-        }
+nuevaPregunta();
 
-    </script>
+</script>
 
 </body>
-
 </html>
